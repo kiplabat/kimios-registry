@@ -17,7 +17,7 @@ what a KimiOS machine would use:
 Nothing here runs a real device.
 
 Apps (control panels and games built in KimiLM, apps/<name>/app-<id>.json) are checked with KimiLM's own code
-(dva/app_share.py, dva/apps.py): their place and name, JSON of at most 512 KB, Apache-2.0, text files only with
+(kimilm/app_share.py, kimilm/apps.py): their place and name, JSON of at most 512 KB, Apache-2.0, text files only with
 index.html, a panel's device described by kind and model only, and the same checks as a save in KimiLM (scripts
 that do not parse, browser storage, anything that reaches the internet)."""
 import argparse
@@ -41,7 +41,10 @@ def load_kimios(path):
 
 def load_kimilm(path):
     sys.path.insert(0, str(Path(path).resolve()))
-    from dva import app_share, apps
+    try:
+        from kimilm import app_share, apps          # KimiLM 2.37.0 and later
+    except ImportError:
+        from dva import app_share, apps             # the package's name before 2.37.0
     return app_share, apps
 
 
