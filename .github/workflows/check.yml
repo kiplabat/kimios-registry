@@ -19,7 +19,9 @@ jobs:
         with:
           repository: kiplabat/KimiLM
           path: .kimilm
-          sparse-checkout: engine/dva
+          sparse-checkout: |
+            engine/kimilm
+            engine/dva
       - name: Every entry passes KimiOS's (drivers, controllers) and KimiLM's (apps) own checks
         run: python3 tools/check.py --kimios .kimios/system_files/usr/libexec/kimios --kimilm .kimilm/engine
       - name: The checker still rejects what it must
@@ -42,7 +44,9 @@ jobs:
         with:
           repository: kiplabat/KimiLM
           path: .kimilm
-          sparse-checkout: engine/dva
+          sparse-checkout: |
+            engine/kimilm
+            engine/dva
       - run: python3 tools/check.py --kimios .kimios/system_files/usr/libexec/kimios --kimilm .kimilm/engine --write-index
       - name: Commit the index if it changed
         run: |

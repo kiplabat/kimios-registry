@@ -43,7 +43,7 @@ what is here and installs it after checking it against `index.json`'s sha256. An
 sandbox like any other: no internet, and nothing reaches a device without the person's yes. A control panel names
 only the kind and model of device it was made for; it is bound to a device on the machine that installs it.
 
-Apps are checked with KimiLM's own code (`dva/app_share.py`, `dva/apps.py`): place and name, JSON of at most
+Apps are checked with KimiLM's own code (`kimilm/app_share.py`, `kimilm/apps.py`): place and name, JSON of at most
 512 KB, Apache-2.0, text files only with `index.html`, scripts that parse (Node.js), no browser storage, nothing
 that reaches the internet.
 
