@@ -46,6 +46,44 @@ def main():
     p.write_text(good.read_text())
     if check.check_entry(p, share, env, bench):
         failures.append("the good entry itself is rejected")
+    if "--kimilm" in sys.argv:                     # apps: KimiLM's own checks
+        kimilm = check.load_kimilm(sys.argv[sys.argv.index("--kimilm") + 1])
+        app_share = kimilm[0]
+        good_app = sorted((Path(__file__).resolve().parents[1] / "apps").rglob("app-*.json"))[0]
+
+        def expect_app(name, mutate, words, keep_place=False):
+            e = json.loads(good_app.read_text())
+            mutate(e)
+            rel = good_app.relative_to(good_app.parents[2]) if keep_place else app_share.entry_path(e)
+            p = tmp / rel
+            shutil.rmtree(tmp / "apps", ignore_errors=True)
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(json.dumps(e))
+            errs = check.check_app(p, kimilm)
+            if not any(words in x for x in errs):
+                failures.append(f"app, {name}: expected {words!r}, got {errs}")
+
+        def internet(e):
+            e["app"]["files"]["index.html"] = e["app"]["files"]["index.html"].replace(
+                "<script>", '<script src="https://cdn.example.com/x.js"></script><script>', 1)
+        expect_app("a changed app keeps the old name", lambda e: e["app"].update(about="changed"), "belongs at",
+                   keep_place=True)
+        expect_app("a script from the internet", internet, "cannot reach the internet")
+        expect_app("a script that does not parse",
+                   lambda e: e["app"]["files"].update({"extra.js": "let x = ;"}), "extra.js")
+        expect_app("browser storage", lambda e: e["app"]["files"].update({"s.js": "localStorage.x = 1;"}),
+                   "browser's own storage")
+        expect_app("a file outside the app", lambda e: e["app"]["files"].update({"../x.js": "1"}), "plain name")
+        expect_app("a picture as text", lambda e: e["app"]["files"].update({"a.png": "x"}), "text file")
+        expect_app("a panel naming a machine", lambda e: e["app"].update(
+            kind="device", **{"for": {"kind": "board", "model": "Pico", "port": "/dev/ttyACM0"}}), "names a machine")
+        expect_app("another licence", lambda e: e.update(licence="MIT"), "Apache-2.0", keep_place=True)
+        p = tmp / good_app.relative_to(good_app.parents[2])
+        shutil.rmtree(tmp / "apps", ignore_errors=True)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(good_app.read_text())
+        if check.check_app(p, kimilm):
+            failures.append(f"the good app itself is rejected: {check.check_app(p, kimilm)}")
     for f in failures:
         print("✗", f)
     print("checker self-test:", "ok" if not failures else f"{len(failures)} failed")

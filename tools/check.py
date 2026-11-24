@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Check every entry in the registry, and build index.json.
 
-    python tools/check.py --kimios ../KimiOS/system_files/usr/libexec/kimios            # check (pull requests)
-    python tools/check.py --kimios ../KimiOS/system_files/usr/libexec/kimios --write-index
+    python tools/check.py --kimios ../KimiOS/system_files/usr/libexec/kimios --kimilm ../KimiLM/engine   # check
+    python tools/check.py --kimios ../KimiOS/system_files/usr/libexec/kimios --kimilm ../KimiLM/engine --write-index
 
 An entry is checked with KimiOS's own code (kimios_share.py, kimios_envelope.py), so the registry accepts exactly
 what a KimiOS machine would use:
@@ -14,7 +14,12 @@ what a KimiOS machine would use:
   datasheet check;
 - a driver passes KimiOS's manifest check against that datasheet, and a controller its spec check;
 - for a simulated device, the driver is also run against KimiOS's simulator of that model and must pass its test.
-Nothing here runs a real device."""
+Nothing here runs a real device.
+
+Apps (control panels and games built in KimiLM, apps/<name>/app-<id>.json) are checked with KimiLM's own code
+(dva/app_share.py, dva/apps.py): their place and name, JSON of at most 512 KB, Apache-2.0, text files only with
+index.html, a panel's device described by kind and model only, and the same checks as a save in KimiLM (scripts
+that do not parse, browser storage, anything that reaches the internet)."""
 import argparse
 import hashlib
 import json
@@ -32,6 +37,19 @@ def load_kimios(path):
     import kimios_envelope
     import kimios_share
     return kimios_share, kimios_envelope, kimios_bench
+
+
+def load_kimilm(path):
+    sys.path.insert(0, str(Path(path).resolve()))
+    from dva import app_share, apps
+    return app_share, apps
+
+
+def check_app(path, kimilm):
+    """An app entry, with KimiLM's own checks."""
+    app_share, apps = kimilm
+    rel = path.relative_to(ROOT).as_posix()
+    return app_share.check_entry(rel, path.read_bytes(), apps.check_files)
 
 
 def check_entry(path, share, env, bench):
@@ -89,15 +107,26 @@ def check_entry(path, share, env, bench):
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--kimios", required=True, help="KimiOS's system_files/usr/libexec/kimios")
+    ap.add_argument("--kimilm", help="KimiLM's engine folder (checks apps)")
     ap.add_argument("--write-index", action="store_true")
     a = ap.parse_args(argv)
     share, env, bench = load_kimios(a.kimios)
-    files = sorted(p for d in ("drivers", "controllers") for p in (ROOT / d).rglob("*") if p.is_file()
+    kimilm = load_kimilm(a.kimilm) if a.kimilm else None
+    files = sorted(p for d in ("drivers", "controllers", "apps") for p in (ROOT / d).rglob("*") if p.is_file()
                    and p.name != ".gitkeep")
     errs, rows = [], []
     for p in files:
         if p.suffix != ".json":
             errs.append(f"{p.relative_to(ROOT)}: only .json entries belong here")
+            continue
+        if p.relative_to(ROOT).parts[0] == "apps":
+            if kimilm is None:
+                errs.append(f"{p.relative_to(ROOT)}: apps are checked with KimiLM's code (--kimilm)")
+                continue
+            found = check_app(p, kimilm)
+            errs += found
+            if not found:
+                rows.append(kimilm[0].index_row(p.relative_to(ROOT).as_posix(), p.read_bytes()))
             continue
         found = check_entry(p, share, env, bench)
         errs += found

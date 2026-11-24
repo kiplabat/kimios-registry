@@ -15,10 +15,15 @@ jobs:
         with:
           repository: kiplabat/KimiOS
           path: .kimios
-      - name: Every entry passes KimiOS's own checks
-        run: python3 tools/check.py --kimios .kimios/system_files/usr/libexec/kimios
+      - uses: actions/checkout@v5
+        with:
+          repository: kiplabat/KimiLM
+          path: .kimilm
+          sparse-checkout: engine/dva
+      - name: Every entry passes KimiOS's (drivers, controllers) and KimiLM's (apps) own checks
+        run: python3 tools/check.py --kimios .kimios/system_files/usr/libexec/kimios --kimilm .kimilm/engine
       - name: The checker still rejects what it must
-        run: python3 tools/test_check.py --kimios .kimios/system_files/usr/libexec/kimios
+        run: python3 tools/test_check.py --kimios .kimios/system_files/usr/libexec/kimios --kimilm .kimilm/engine
 
   index:
     # on main only: rebuild index.json, which KimiOS machines read, from the entries that pass
@@ -33,7 +38,12 @@ jobs:
         with:
           repository: kiplabat/KimiOS
           path: .kimios
-      - run: python3 tools/check.py --kimios .kimios/system_files/usr/libexec/kimios --write-index
+      - uses: actions/checkout@v5
+        with:
+          repository: kiplabat/KimiLM
+          path: .kimilm
+          sparse-checkout: engine/dva
+      - run: python3 tools/check.py --kimios .kimios/system_files/usr/libexec/kimios --kimilm .kimilm/engine --write-index
       - name: Commit the index if it changed
         run: |
           git diff --quiet -- index.json && exit 0

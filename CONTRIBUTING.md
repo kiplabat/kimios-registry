@@ -16,3 +16,9 @@ By hand:
 
 Entries for real devices say so in `evidence.on`. Controllers can carry measured `results` (time in band,
 starts per hour, energy) so others can compare.
+
+## Apps
+
+From KimiLM: open the app, press **Share** in its bar, read the entry and propose it. By hand: put the file at
+`apps/<name>/app-<id>.json` (`tools/check.py` says the right name). A maintainer plays the game or opens the panel
+before merging, and checks that the note and the request say what it does.
