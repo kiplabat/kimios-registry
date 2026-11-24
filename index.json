@@ -2,6 +2,25 @@
  "schema": 1,
  "entries": [
   {
+   "path": "apps/snake-duel/app-a89d82459ab4.json",
+   "kind": "app",
+   "app_kind": "game",
+   "name": "Snake Duel",
+   "slug": "snake-duel",
+   "about": "Two snakes, one apple at a time: race the computer's snake to 15 apples without crashing into a wall or either body. Arrows/WASD, swipes or a gamepad.",
+   "icon": {
+    "emoji": "🐍",
+    "color": "#46A37B"
+   },
+   "dims": "2D",
+   "for": null,
+   "note": "A seed entry: a game that does not come with KimiLM, to show installing from the registry",
+   "model": "",
+   "date": "2026-11-24",
+   "size": 9231,
+   "sha256": "b35c0a745fc57a97b42b59e3a76ab4d345eec1c41ebde79eb9b537c9e5cef9bd"
+  },
+  {
    "path": "controllers/simulated-two-compartment-refrigerator/controller-801a443e4040.json",
    "kind": "controller",
    "model": "simulated two-compartment refrigerator",
