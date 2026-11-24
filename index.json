@@ -1,0 +1,88 @@
+{
+ "schema": 1,
+ "entries": [
+  {
+   "path": "controllers/simulated-two-compartment-refrigerator/controller-801a443e4040.json",
+   "kind": "controller",
+   "model": "simulated two-compartment refrigerator",
+   "slug": "simulated-two-compartment-refrigerator",
+   "shape": {
+    "sensors": [
+     "door",
+     "t_bottom",
+     "t_top"
+    ],
+    "outputs": [
+     "compressor",
+     "damper"
+    ]
+   },
+   "simulated": true,
+   "note": "Freezer on/off around -18 C (band 2) with the compressor; fresh food around 4 C (band 1) with the damper, which needs the compressor running. Results: 6 h of device time on KimiOS's simulator after 2 h to settle.",
+   "date": "2026-11-24",
+   "evidence": {
+    "check": "accepted",
+    "on": "simulated",
+    "results": {
+     "device_hours": 6,
+     "top_mean_c": 3.98,
+     "top_max_dev_c": 0.7,
+     "bottom_mean_c": -18.02,
+     "bottom_max_dev_c": 1.2,
+     "compressor_starts_per_hour": 2.8,
+     "compressor_duty": 0.53
+    }
+   },
+   "sha256": "f100da080f0a8af330472ce5f75778f9022ac18fb4b054668d440054b813bf92"
+  },
+  {
+   "path": "drivers/simulated-room-with-an-electric-heater/driver-12c0f451f727.json",
+   "kind": "driver",
+   "model": "simulated room with an electric heater",
+   "slug": "simulated-room-with-an-electric-heater",
+   "shape": {
+    "sensors": [
+     "temp"
+    ],
+    "outputs": [
+     "heater"
+    ]
+   },
+   "simulated": true,
+   "note": "Heater power as 0..1, sent as percent (scale 100).",
+   "date": "2026-11-24",
+   "evidence": {
+    "test": "passed",
+    "checks": 2,
+    "on": "simulated"
+   },
+   "sha256": "45ff7c35f71e924571865c0379f3e65d2ffa8a601438a46226543ef4f0e97b87"
+  },
+  {
+   "path": "drivers/simulated-two-compartment-refrigerator/driver-56e269a2c827.json",
+   "kind": "driver",
+   "model": "simulated two-compartment refrigerator",
+   "slug": "simulated-two-compartment-refrigerator",
+   "shape": {
+    "sensors": [
+     "door",
+     "t_bottom",
+     "t_top"
+    ],
+    "outputs": [
+     "compressor",
+     "damper"
+    ]
+   },
+   "simulated": true,
+   "note": "Reads both compartments and the door in one MEAS?; compressor and damper are on/off.",
+   "date": "2026-11-24",
+   "evidence": {
+    "test": "passed",
+    "checks": 5,
+    "on": "simulated"
+   },
+   "sha256": "a501200e135577d659d72123a6b8da1438574eeba1530aac6370ffb38ef0da6c"
+  }
+ ]
+}

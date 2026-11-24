@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "kind": "driver",
+  "model": "simulated room with an electric heater",
+  "slug": "simulated-room-with-an-electric-heater",
+  "shape": {
+    "sensors": [
+      "temp"
+    ],
+    "outputs": [
+      "heater"
+    ]
+  },
+  "simulated": true,
+  "driver": {
+    "read": [
+      {
+        "command": "READ",
+        "pattern": "TEMP (?P<temp>-?[\\d.]+) C"
+      }
+    ],
+    "write": {
+      "heater": {
+        "command": "POWER {value}",
+        "scale": 100
+      }
+    }
+  },
+  "datasheet": {
+    "model": "simulated room with an electric heater",
+    "kind": "heater",
+    "risk": "physical",
+    "sensors": {
+      "temp": {
+        "unit": "degC",
+        "about": "room temperature",
+        "valid": [
+          -30,
+          60
+        ],
+        "setpoints": [
+          10,
+          25
+        ]
+      }
+    },
+    "outputs": {
+      "heater": {
+        "type": "level",
+        "about": "heater power, 0 to 1",
+        "min": 0,
+        "max": 1,
+        "max_rate_per_s": 0.01,
+        "safe": 0
+      }
+    },
+    "trips": [
+      {
+        "sensor": "temp",
+        "above": 27,
+        "force": {
+          "heater": 0
+        },
+        "about": "room too hot"
+      }
+    ],
+    "default": {
+      "about": "off unless asked",
+      "period_s": 10,
+      "loops": []
+    },
+    "stale_s": 120,
+    "identity": "KimiOS-Sim,ROOMHEAT,,0.9"
+  },
+  "evidence": {
+    "test": "passed",
+    "checks": 2,
+    "on": "simulated"
+  },
+  "note": "Heater power as 0..1, sent as percent (scale 100).",
+  "kimios": "0.14.0",
+  "date": "2026-11-24",
+  "licence": "Apache-2.0"
+}

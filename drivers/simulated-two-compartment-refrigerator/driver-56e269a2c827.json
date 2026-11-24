@@ -1,0 +1,145 @@
+{
+  "schema": 1,
+  "kind": "driver",
+  "model": "simulated two-compartment refrigerator",
+  "slug": "simulated-two-compartment-refrigerator",
+  "shape": {
+    "sensors": [
+      "door",
+      "t_bottom",
+      "t_top"
+    ],
+    "outputs": [
+      "compressor",
+      "damper"
+    ]
+  },
+  "simulated": true,
+  "driver": {
+    "read": [
+      {
+        "command": "MEAS?",
+        "pattern": "T_TOP=(?P<t_top>-?[\\d.]+) T_BOT=(?P<t_bottom>-?[\\d.]+) DOOR=(?P<door>[01])"
+      }
+    ],
+    "write": {
+      "compressor": {
+        "command": "OUTP:COMP {value}",
+        "ok": "^OK"
+      },
+      "damper": {
+        "command": "OUTP:DAMP {value}"
+      }
+    }
+  },
+  "datasheet": {
+    "model": "simulated two-compartment refrigerator",
+    "kind": "appliance",
+    "risk": "physical",
+    "sensors": {
+      "t_top": {
+        "unit": "degC",
+        "about": "top (fresh food) compartment",
+        "valid": [
+          -40,
+          60
+        ],
+        "setpoints": [
+          0,
+          10
+        ]
+      },
+      "t_bottom": {
+        "unit": "degC",
+        "about": "bottom (freezer) compartment",
+        "valid": [
+          -45,
+          60
+        ],
+        "setpoints": [
+          -25,
+          -12
+        ]
+      },
+      "door": {
+        "unit": "0/1",
+        "about": "top door open",
+        "valid": [
+          0,
+          1
+        ]
+      }
+    },
+    "outputs": {
+      "compressor": {
+        "type": "bool",
+        "about": "compressor and evaporator fan",
+        "min_on_s": 120,
+        "min_off_s": 300,
+        "max_starts_per_hour": 8,
+        "safe": 0
+      },
+      "damper": {
+        "type": "bool",
+        "about": "air damper from the freezer into the top",
+        "min_on_s": 10,
+        "min_off_s": 10,
+        "safe": 0
+      }
+    },
+    "trips": [
+      {
+        "sensor": "t_bottom",
+        "below": -30,
+        "force": {
+          "compressor": 0
+        },
+        "about": "freezer too cold"
+      },
+      {
+        "sensor": "t_top",
+        "below": -1,
+        "force": {
+          "damper": 0
+        },
+        "about": "fresh food would freeze"
+      }
+    ],
+    "default": {
+      "about": "the appliance's own thermostat",
+      "period_s": 10,
+      "loops": [
+        {
+          "name": "freezer",
+          "sensor": "t_bottom",
+          "output": "compressor",
+          "setpoint": -16,
+          "band": 4,
+          "action": "cool"
+        },
+        {
+          "name": "fresh food",
+          "sensor": "t_top",
+          "output": "damper",
+          "setpoint": 6,
+          "band": 3,
+          "action": "cool",
+          "also": [
+            "compressor"
+          ]
+        }
+      ]
+    },
+    "stale_s": 90,
+    "identity": "KimiOS-Sim,FRIDGE2,,1.2"
+  },
+  "evidence": {
+    "test": "passed",
+    "checks": 5,
+    "on": "simulated"
+  },
+  "note": "Reads both compartments and the door in one MEAS?; compressor and damper are on/off.",
+  "kimios": "0.14.0",
+  "date": "2026-11-24",
+  "licence": "Apache-2.0"
+}
